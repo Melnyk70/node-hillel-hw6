@@ -2,26 +2,26 @@
 
 ## Структура
 
-* `01\_html\_with\_utm` — HTML-файл із шаблону 
-* `02\_express` — Express-додаток для Task 03-06
-* `03\_cart` — Express-додаток на основі шаблону для Task 08-10
+- `01_html_with_utm` — HTML-файл із шаблону
+- `02_express` — Express-додаток для Task 03–06
+- `03_cart` — Express-додаток на основі шаблону для Task 08–10
 
 ## Запуск
 
-### 02\_express
+### 02_express
 
 ```bash
-cd 02\_express
+cd 02_express
 npm install
 npm start
 ```
 
-Відкрити: `http://localhost:3500/`\\
+Відкрити: `http://localhost:3500/`
 
-### 03\_cart
+### 03_cart
 
 ```bash
-cd 03\_cart
+cd 03_cart
 npm install
 npm start
 ```
@@ -30,10 +30,26 @@ npm start
 
 ## Реалізовано
 
-* `/` -> `Server works`
-* `/product` -> створення cookies для `utm\_source`, `utm\_medium`, `utm\_campaign`, `utm\_term` на 25 днів
-* middleware для `uid` -> якщо cookie немає або довжина не 16 символів, створюється нова
-* `/clear` -> очищення всіх cookies
-* `/` у `03\_cart` -> віддає `index.html`
-* `/cart` -> читає cookie `cart`, бере URL товару і кількість, перевіряє `stock` у `data/goods.json`
+### 02_express
 
+- `/` — повертає `Server works`
+- `/product` — створює cookies для:
+  - `utm_source`
+  - `utm_medium`
+  - `utm_campaign`
+  - `utm_term`
+- час життя UTM cookies — 25 днів
+- middleware для `uid`:
+  - якщо cookie відсутня або її значення не має довжини 16 символів, створюється нова
+- `/clear` — очищає всі cookies
+
+### 03_cart
+
+- `/` — віддає `index.html`
+- `/cart` — читає cookie `cart`, отримує URL товару та кількість, перевіряє `stock` у `data/goods.json`
+
+## Перевірені сценарії
+
+- товар є в наявності → `1`
+- товару недостатньо → `0`
+- кошик порожній → `cart is empty`
