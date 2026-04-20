@@ -1,27 +1,13 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
-import crypto from 'crypto';
+import { PORT, UTM_KEYS } from './config/constants.js';
+import ensureUid from './middleware/ensureUid.js';
+import { utmCookieOptions } from './utils/cookieOptions.js';
 
 const app = express();
-const PORT = process.env.PORT || 3500;
-const COOKIE_MAX_AGE = 25 * 24 * 60 * 60 * 1000;
-const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term'];
 
 app.use(cookieParser());
-
-app.use((req, res, next) => {
-  const { uid } = req.cookies;
-
-  if (typeof uid !== 'string' || uid.length !== 16) {
-    res.cookie('uid', crypto.randomBytes(8).toString('hex'), {
-      maxAge: COOKIE_MAX_AGE,
-      httpOnly: true,
-      sameSite: 'lax',
-    });
-  }
-
-  next();
-});
+app.use(ensureUid);
 
 app.get('/', (req, res) => {
   res.send('Server works');
@@ -32,10 +18,7 @@ app.get('/product', (req, res) => {
     const value = req.query[key];
 
     if (typeof value === 'string' && value.trim() !== '') {
-      res.cookie(key, value, {
-        maxAge: COOKIE_MAX_AGE,
-        sameSite: 'lax',
-      });
+      res.cookie(key, value, utmCookieOptions);
     }
   }
 

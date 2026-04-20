@@ -1,14 +1,20 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import path from 'path';
-import fs from 'fs/promises';
 import { fileURLToPath } from 'url';
+import {
+  PORT,
+  CART_EMPTY_RESPONSE,
+  CART_AVAILABLE_RESPONSE,
+  CART_NOT_AVAILABLE_RESPONSE,
+} from './config/constants.js';
+import { getCartEntry } from './utils/cart.js';
+import { getGoods } from './services/goods.service.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 app.use(cookieParser());
 
@@ -17,52 +23,28 @@ app.get('/', (req, res) => {
 });
 
 app.get('/cart', async (req, res) => {
-  const { cart } = req.cookies;
+  const cartEntry = getCartEntry(req.cookies.cart);
 
-  if (!cart) {
-    return res.send('cart is empty');
+  if (cartEntry.type === 'empty') {
+    return res.send(CART_EMPTY_RESPONSE);
   }
 
-  let parsedCart;
-
-  try {
-    parsedCart = JSON.parse(cart);
-  } catch {
-    return res.send('0');
+  if (cartEntry.type === 'invalid') {
+    return res.send(CART_NOT_AVAILABLE_RESPONSE);
   }
 
-  if (!parsedCart || typeof parsedCart !== 'object' || Array.isArray(parsedCart)) {
-    return res.send('0');
-  }
-
-  const entries = Object.entries(parsedCart);
-
-  if (entries.length === 0) {
-    return res.send('cart is empty');
-  }
-
-  const [productUrl, quantityRaw] = entries[0];
-  const quantity = Number(quantityRaw);
-
-  if (!productUrl || !Number.isInteger(quantity) || quantity < 1) {
-    return res.send('0');
-  }
-
-  const goodsPath = path.join(__dirname, 'data', 'goods.json');
-  const goodsData = await fs.readFile(goodsPath, 'utf-8');
-  const goods = JSON.parse(goodsData);
-
-  const product = goods.find((item) => item.url === productUrl);
+  const goods = await getGoods();
+  const product = goods.find((item) => item.url === cartEntry.productUrl);
 
   if (!product) {
-    return res.send('0');
+    return res.send(CART_NOT_AVAILABLE_RESPONSE);
   }
 
-  if (Number(product.stock) >= quantity) {
-    return res.send('1');
+  if (Number(product.stock) >= cartEntry.quantity) {
+    return res.send(CART_AVAILABLE_RESPONSE);
   }
 
-  return res.send('0');
+  return res.send(CART_NOT_AVAILABLE_RESPONSE);
 });
 
 app.listen(PORT, () => {
