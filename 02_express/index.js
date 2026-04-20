@@ -33,6 +33,10 @@ app.get('/clear', (req, res) => {
   res.send('Cookies cleared');
 });
 
+app.use((req, res) => {
+  res.status(404).send('404 page not found');
+});
+
 app.listen(PORT, () => {
   console.log(`Server works on http://localhost:${PORT}`);
 });

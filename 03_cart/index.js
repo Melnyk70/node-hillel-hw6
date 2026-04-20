@@ -47,6 +47,10 @@ app.get('/cart', async (req, res) => {
   return res.send(CART_NOT_AVAILABLE_RESPONSE);
 });
 
+app.use((req, res) => {
+  res.status(404).send('404 page not found');
+});
+
 app.listen(PORT, () => {
   console.log(`Server works on http://localhost:${PORT}`);
 });
